@@ -1,10 +1,10 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import './App.css';
 import axios from 'axios';
 const FormData = require('form-data');
 
 function App() {
-
+  const [data, setData] = useState();
   const [name, setName] = useState("");
   const [avatar, setAvatar] = useState("");
 
@@ -27,6 +27,15 @@ function App() {
     console.log(res);
   }
 
+  useEffect(() => {
+    const fetchData = async () => {
+      const res = await fetch('http://localhost:5000/getData');
+      const json = await res.json();
+      setData(json);
+    }
+    fetchData();
+  }, [])
+
   return (
     <>
       <form onSubmit={handleProfile}>
@@ -34,6 +43,14 @@ function App() {
         <input type="file" name="avatar" onChange={handleChange} />
         <input type="submit" value="submit" />
       </form>
+
+      {console.log(data)}
+      {
+        data && <>
+          <img src={data.avatar} alt="image" width={250} />
+          <h1>{data.name}</h1>
+        </>
+      }
     </>
   );
 }

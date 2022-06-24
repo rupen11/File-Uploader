@@ -8,12 +8,15 @@ const bodyParser = require("body-parser");
 const app = express();
 app.use(express.json());
 app.use(cors());
-app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.urlencoded({ extended: false }));
 require("./db/db");
+app.use('/public', express.static('public'));
+
+const DIR = './public/';
 
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
-        cb(null, 'uploads');
+        cb(null, DIR);
     },
     filename: function (req, file, cb) {
         const fileName = file.originalname.split(".");
@@ -39,11 +42,22 @@ app.post('/profile', upload.single('avatar'), async (req, res) => {
         const url = req.protocol + '://' + req.get('host');
         const user = new imageModel({
             name: req.body.name,
-            avatar: url + '/uplaods/' + req.file.filename
+            avatar: url + '/public/' + req.file.filename
         });
         const saveUser = await user.save();
         if (!saveUser) return res.status(400).send("Some error");
         return res.status(200).send("saved");
+    }
+    catch (error) {
+        console.log(error);
+    }
+})
+
+app.get('/getData', async (req, res) => {
+    try {
+        const user = await imageModel.findById(id);
+        if (!user) return res.status(400).send("Some error");
+        return res.status(200).json(user);
     }
     catch (error) {
         console.log(error);
